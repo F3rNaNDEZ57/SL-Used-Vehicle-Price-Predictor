@@ -14,26 +14,32 @@ def train_model():
     X = df.drop('price_lkr', axis=1)
     y = df['price_lkr']
     
+    # DEBUG: Check features
+    print("Features used:", X.columns.tolist())
+    print("Mileage in features:", 'mileage_km' in X.columns)
+    print("Km_per_year in features:", 'km_per_year' in X.columns)
+    
     # Log transform target (prices are skewed)
     y_log = np.log1p(y)
     
-    # Categorical features indices for CatBoost
+    # Categorical features for CatBoost
     categorical_features = [
         'Manufacturer', 'Model', 'Fuel Type', 'Transmission', 
         'Condition', 'body_type', 'power_category', 'Colour', 'location'
     ]
     
-    # Only keep columns that exist
+    # Only keep columns that exist in X
     cat_features = [col for col in categorical_features if col in X.columns]
     
-    print(f"Categorical features: {cat_features}")
+    print(f"\nCategorical features: {cat_features}")
+    print(f"Numerical features: {[c for c in X.columns if c not in cat_features]}")
     
     # Split
     X_train, X_test, y_train, y_test = train_test_split(
         X, y_log, test_size=0.2, random_state=42
     )
     
-    # Initialize CatBoost
+    # Initialize CatBoost with better parameters
     model = CatBoostRegressor(
         iterations=1000,
         learning_rate=0.05,
@@ -42,10 +48,13 @@ def train_model():
         cat_features=cat_features,
         verbose=100,
         random_seed=42,
-        early_stopping_rounds=50
+        early_stopping_rounds=50,
+        # Handle overfitting better
+        bagging_temperature=0.5,
+        random_strength=2
     )
     
-    print("Training CatBoost model...")
+    print("\nTraining CatBoost model...")
     model.fit(X_train, y_train, eval_set=(X_test, y_test))
     
     # Predictions (convert back from log scale)
@@ -85,6 +94,12 @@ def train_model():
     test_data['actual_price'] = y_true
     test_data['predicted_price'] = y_pred
     test_data.to_csv('data/processed/test_predictions.csv', index=False)
+    
+    # Calculate residuals for error analysis
+    test_data['error'] = test_data['actual_price'] - test_data['predicted_price']
+    test_data['abs_error'] = np.abs(test_data['error'])
+    print(f"\nWorst predictions (top 5 overpriced):")
+    print(test_data.nlargest(5, 'error')[['Manufacturer', 'Model', 'actual_price', 'predicted_price', 'error']])
     
     return model, X_test, y_test
 
