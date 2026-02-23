@@ -8,3 +8,6 @@ seaborn
 plotly
 streamlit
 openpyxl
+requests
+beautifulsoup4
+lxml

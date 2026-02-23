@@ -10,19 +10,17 @@ def train_model():
     # Load data
     df = pd.read_csv('data/processed/vehicles_clean.csv')
     
-    # Features and target
+    # Features and target (is_registered removed)
     X = df.drop('price_lkr', axis=1)
     y = df['price_lkr']
     
     # DEBUG: Check features
     print("Features used:", X.columns.tolist())
-    print("Mileage in features:", 'mileage_km' in X.columns)
-    print("Km_per_year in features:", 'km_per_year' in X.columns)
     
     # Log transform target (prices are skewed)
     y_log = np.log1p(y)
     
-    # Categorical features for CatBoost
+    # Categorical features for CatBoost (removed is_registered)
     categorical_features = [
         'Manufacturer', 'Model', 'Fuel Type', 'Transmission', 
         'Condition', 'body_type', 'power_category', 'Colour', 'location'
@@ -49,7 +47,6 @@ def train_model():
         verbose=100,
         random_seed=42,
         early_stopping_rounds=50,
-        # Handle overfitting better
         bagging_temperature=0.5,
         random_strength=2
     )

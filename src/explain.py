@@ -10,6 +10,10 @@ def explain_model():
     model = joblib.load('models/catboost_vehicle_price.pkl')
     df = pd.read_csv('data/processed/vehicles_clean.csv')
     
+    # Drop is_registered if it exists (for backwards compatibility)
+    if 'is_registered' in df.columns:
+        df = df.drop('is_registered', axis=1)
+    
     # Sample 1000 rows for SHAP (speed)
     X_sample = df.drop('price_lkr', axis=1).sample(n=min(1000, len(df)), random_state=42)
     
@@ -32,7 +36,6 @@ def explain_model():
     print("Saved: models/shap_importance.png")
     
     # 3. Individual explanation example (force plot for first instance)
-    # Convert to HTML for report
     shap.force_plot(explainer.expected_value, shap_values[0], X_sample.iloc[0], 
                     matplotlib=True, show=False)
     plt.savefig('models/shap_force_plot.png', dpi=150, bbox_inches='tight')

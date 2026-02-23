@@ -116,9 +116,9 @@ def preprocess_data(input_path, output_path):
     # Select final columns (REMOVED 'Power' - duplicates engine_cc)
     model_cols = [
         'Manufacturer', 'Model', 'Model Year', 'vehicle_age',
-        'mileage_km', 'km_per_year',  # NEW FEATURE ADDED
+        'mileage_km', 'km_per_year',
         'Fuel Type', 'Transmission', 'Condition',
-        'body_type', 'engine_cc', 'is_luxury', 'is_registered',
+        'body_type', 'engine_cc', 'is_luxury',
         'Colour', 'location', 'price_lkr'
     ]
     

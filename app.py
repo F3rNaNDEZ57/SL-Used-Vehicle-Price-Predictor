@@ -57,9 +57,8 @@ if page == "Price Predictor":
     vehicle_age = 2024 - year
     km_per_year = mileage / (vehicle_age + 1)
     is_luxury = 1 if manufacturer in ['BMW', 'Mercedes Benz', 'Audi'] else 0
-    is_registered = 1
     
-    # Create input dataframe
+    # Create input dataframe (REMOVED is_registered)
     input_data = pd.DataFrame({
         'Manufacturer': [manufacturer],
         'Model': [model_name],
@@ -73,7 +72,6 @@ if page == "Price Predictor":
         'body_type': [body],
         'engine_cc': [engine],
         'is_luxury': [is_luxury],
-        'is_registered': [is_registered],
         'Colour': [color],
         'location': [location]
     })
@@ -104,7 +102,6 @@ if page == "Price Predictor":
             }).sort_values('Abs_Impact', ascending=False)
             
             # Convert log contributions to approximate LKR impact
-            # Approximate: exp(log_pred + shap) - exp(log_pred) ≈ pred * shap (for small shap)
             explanation_df['Price_Impact_LKR'] = pred_price * explanation_df['SHAP_Value']
             
             # Display metrics
@@ -247,13 +244,13 @@ else:  # Model Analytics Page
         
         st.markdown("---")
         
-        # Dependence Plots
+        # Dependence Plots (REMOVED engine_cc from options)
         st.subheader("🔗 Feature Dependence Analysis")
         st.markdown("How specific features interact with the predicted price.")
         
         feature_to_plot = st.selectbox(
             "Select feature to analyze:",
-            options=['mileage_km', 'vehicle_age', 'engine_cc', 'km_per_year', 'Model Year'],
+            options=['mileage_km', 'vehicle_age', 'km_per_year', 'Model Year'],  # Removed engine_cc
             index=0
         )
         
@@ -308,6 +305,6 @@ st.sidebar.info("""
 **About this model:**
 - Algorithm: CatBoost (Gradient Boosting)
 - Data: PatPat.lk listings (Sri Lanka)
-- Features: 15 (including engineered features like km/year)
+- Features: 14 (removed is_registered due to zero variance)
 - MAPE: ~11.4%
 """)
